@@ -57,7 +57,7 @@ products = [
 ]
 
 dependencies = [
-    HostBuildDependency("CMake_jll"),
+    HostBuildDependency(PackageSpec(; name="CMake_jll", version="3.31.9")),
     # Compiles the compute shaders at build time.
     HostBuildDependency("glslang_jll"),
     # Static libraries, linked in for runtime GLSL compilation.
