@@ -1,5 +1,8 @@
 using BinaryBuilder, Pkg
 
+const YGGDRASIL_DIR = "../.."
+include(joinpath(YGGDRASIL_DIR, "platforms", "macos_sdks.jl"))
+
 name = "nlolib"
 version = v"0.1.0"
 
@@ -35,11 +38,17 @@ cmake --install build
 install_license LICENSE
 """
 
+# The glslang static libraries use std::filesystem, which needs macOS 10.15.
+sources, script = require_macos_sdk("10.15", sources, script)
+
 platforms = supported_platforms()
 # Vulkan_Loader_jll has no build for these.
 filter!(p -> arch(p) != "armv6l", platforms)
 filter!(p -> arch(p) != "riscv64", platforms)
 filter!(p -> !(Sys.isfreebsd(p) && arch(p) == "aarch64"), platforms)
+# The 32-bit Windows import library of Vulkan_Loader_jll lacks the stdcall
+# names (vkCreateBuffer@16), so linking against it fails.
+filter!(p -> !(Sys.iswindows(p) && nbits(p) == 32), platforms)
 # The glslang static libraries carry std::string in their symbols.
 platforms = expand_cxxstring_abis(platforms)
 
