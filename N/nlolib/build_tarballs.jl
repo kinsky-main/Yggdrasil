@@ -8,7 +8,8 @@ version = v"0.1.0"
 
 sources = [
     GitSource("https://github.com/kinsky-main/nlo-rk4ip-code.git",
-              "7c5ecaa031ed40eec53f9f4752b332923409c90a"),
+              "14054d9ea3a3d3be07f7f9e0af467020360df02f";
+              tag="v$(version)"),
     # Header-only, and Yggdrasil builds VkFFT only for its CUDA, Metal and OpenCL backends.
     GitSource("https://github.com/DTolm/VkFFT.git",
               "066a17c17068c0f11c9298d848c2976c71fad1c1";
