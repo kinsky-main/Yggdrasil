@@ -5,7 +5,7 @@ version = v"0.1.0"
 
 sources = [
     GitSource("https://github.com/kinsky-main/nlo-rk4ip-code.git",
-              "180660e7566eef1cea8343e86825c5805d2afa7f"),
+              "7c5ecaa031ed40eec53f9f4752b332923409c90a"),
     # Header-only, and Yggdrasil builds VkFFT only for its CUDA, Metal and OpenCL backends.
     GitSource("https://github.com/DTolm/VkFFT.git",
               "066a17c17068c0f11c9298d848c2976c71fad1c1";
@@ -14,6 +14,8 @@ sources = [
 
 script = raw"""
 cd ${WORKSPACE}/srcdir/nlo-rk4ip-code
+# nlolib needs CMake >= 3.22.1; drop the image's 3.21 so CMake_jll is used.
+apk del cmake
 cmake -B build -GNinja \
     -DCMAKE_INSTALL_PREFIX=${prefix} \
     -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TARGET_TOOLCHAIN} \
@@ -46,15 +48,20 @@ products = [
 ]
 
 dependencies = [
+    HostBuildDependency("CMake_jll"),
     # Compiles the compute shaders at build time.
     HostBuildDependency("glslang_jll"),
     # Static libraries, linked in for runtime GLSL compilation.
     BuildDependency("glslang_jll"),
     BuildDependency("Vulkan_Headers_jll"),
+    # libstdc++ and libgcc_s, for the statically linked glslang.
+    Dependency("CompilerSupportLibraries_jll"),
     Dependency("Vulkan_Loader_jll"; compat="1.3.243"),
     Dependency("FFTW_jll"; compat="3.3.10"),
-    # nlolib pins SQLite 3.49.2 in its own build; SQLite_jll 3.49.0 is yanked.
-    Dependency("SQLite_jll"; compat="3.51.2"),
+    # nlolib needs SQLite >= 3.49.2. The SQLite_jll releases from 3.51.2 up to
+    # 3.54.0 each have their own soname on Linux, so a library linked against
+    # one loads with no other; 3.54.1 is back to libsqlite3.so.0.
+    Dependency("SQLite_jll"; compat="3.54.1"),
 ]
 
 # glslang_jll is built with GCC 9.
